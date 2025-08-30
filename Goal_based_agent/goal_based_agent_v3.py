@@ -2,20 +2,17 @@ import streamlit as st
 from langchain_google_genai import GoogleGenerativeAI
 from langchain.agents import initialize_agent, Tool, AgentType
 from langchain.memory import ConversationBufferMemory
-from dotenv import load_dotenv
 import os
 import re
 import fitz  # PyMuPDF
 
 # -----------------------------
-# Load API Key
+# Load API Key from Streamlit Secrets or Environment
 # -----------------------------
-load_dotenv()
 GOOGLE_API_KEY = os.getenv("GEMINI_API_KEY","AIzaSyAJoievCdhnH4VUJjTVZ-Vkp1J3v1D53ao")
 
-
 if not GOOGLE_API_KEY:
-    st.error("❌ GOOGLE_API_KEY not found! Please add it to your .env file.")
+    st.error("❌ GOOGLE_API_KEY not found! Please add it in Streamlit Secrets or environment variables.")
     st.stop()
 
 # -----------------------------
@@ -36,7 +33,6 @@ application_info = {"name": None, "email": None, "skills": None}
 # -----------------------------
 # Helper Functions
 # -----------------------------
-
 def extract_application_info(text: str) -> str:
     """Extract Name, Email, Skills from user chat text."""
     name_match = re.search(r"(?:my name is|i am|name:)\s*([a-zA-Z][a-zA-Z\s]+)", text, re.IGNORECASE)
@@ -79,7 +75,7 @@ def extract_info_from_cv(text: str):
     if skills_match:
         extracted_info["skills"] = skills_match.group(1).strip()
 
-    # Fallback: Guess name and skills if labels are missing
+    # Fallback guesses
     if not extracted_info["name"]:
         name_guess = re.search(r"\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\b", text)
         if name_guess:
